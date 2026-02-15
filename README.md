@@ -1,6 +1,6 @@
 # Social Content Creator
 
-AIエンジニア「Aidotters」の情報発信効率化ツール。ブログ記事生成・WordPress投稿・Notion連携・情報収集を一貫して行います。
+AIエンジニア用のClaude Codeを利用した情報発信効率化ツール。ブログ記事生成・WordPress投稿・Notion連携・情報収集を一貫して行います。
 
 ## セットアップ
 
