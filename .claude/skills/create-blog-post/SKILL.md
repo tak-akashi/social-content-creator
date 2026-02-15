@@ -1,3 +1,8 @@
+---
+name: create-blog-post
+description: ブログ記事の生成・レビュー・投稿を一括で行うスキル。コンテンツタイプ（weekly-ai-news, paper-review, project-intro等）を指定して記事を作成し、WordPress投稿まで対応。
+---
+
 # create-blog-post スキル
 
 ブログ記事の生成・レビュー・投稿を一括で行うスキルです。
