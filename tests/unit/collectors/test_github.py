@@ -17,6 +17,7 @@ class TestGitHubCollectorInit:
     ) -> None:
         """GITHUB_TOKEN未設定時に警告ログが出力される。"""
         monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+        monkeypatch.setattr("src.collectors.github.load_dotenv", lambda: None)
         with caplog.at_level(logging.WARNING):
             GitHubCollector(token="")
         assert "GITHUB_TOKEN" in caplog.text

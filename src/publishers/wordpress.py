@@ -5,9 +5,11 @@ import os
 from typing import Literal
 
 import httpx
+from dotenv import load_dotenv
 
 from src.errors import WordPressPublishError
 from src.models.blog_post import BlogPost, PublishResult
+from src.utils.markdown import markdown_to_html
 
 
 class WordPressPublisher:
@@ -19,6 +21,7 @@ class WordPressPublisher:
         username: str | None = None,
         app_password: str | None = None,
     ) -> None:
+        load_dotenv()
         self._base_url = (base_url or os.environ.get("WORDPRESS_URL", "")).rstrip("/")
         self._username = username or os.environ.get("WORDPRESS_USER", "")
         self._app_password = app_password or os.environ.get("WORDPRESS_APP_PASSWORD", "")
@@ -73,9 +76,11 @@ class WordPressPublisher:
                 category_ids = await self._resolve_categories(client, categories or [])
                 tag_ids = await self._resolve_tags(client, tags or [])
 
+                html_content = markdown_to_html(post.content)
+
                 payload: dict[str, object] = {
                     "title": post.title,
-                    "content": post.content,
+                    "content": html_content,
                     "status": status,
                     "slug": post.slug,
                 }

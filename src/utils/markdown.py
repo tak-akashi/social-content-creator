@@ -5,6 +5,7 @@ import unicodedata
 from pathlib import Path
 
 import frontmatter
+import markdown as md
 
 
 def write_frontmatter_markdown(path: Path, metadata: dict[str, object], content: str) -> None:
@@ -57,6 +58,18 @@ def generate_slug(title: str) -> str:
     # 先頭末尾のハイフンを除去
     slugified = slugified.strip("-")
     return slugified or "untitled"
+
+
+def markdown_to_html(text: str) -> str:
+    """MarkdownテキストをHTMLに変換する。
+
+    Args:
+        text: Markdown形式のテキスト
+
+    Returns:
+        HTML文字列
+    """
+    return md.markdown(text, extensions=["extra", "nl2br", "sane_lists"])
 
 
 def count_characters(text: str) -> int:

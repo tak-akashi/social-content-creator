@@ -61,3 +61,22 @@ Thumbs.db
 
 # Local settings
 .claude/settings.local.json
+
+.playwright-mcp/
+
+docs/drafts/
+docs/drafts/weekly-ai-news/
+!docs/drafts/.gitkeep
+
+docs/posts/
+!docs/posts/.gitkeep
+
+docs/ideas/
+!docs/ideas/.gitkeep
+
+docs/plan/
+!docs/plan/.gitkeep
+
+docs/refs/
+
+temp/

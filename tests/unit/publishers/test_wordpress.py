@@ -38,6 +38,7 @@ class TestWordPressPublisherInit:
         monkeypatch.delenv("WORDPRESS_URL", raising=False)
         monkeypatch.delenv("WORDPRESS_USER", raising=False)
         monkeypatch.delenv("WORDPRESS_APP_PASSWORD", raising=False)
+        monkeypatch.setattr("src.publishers.wordpress.load_dotenv", lambda: None)
         with pytest.raises(ValueError, match="WORDPRESS_URL"):
             WordPressPublisher()
 
@@ -46,6 +47,7 @@ class TestWordPressPublisherInit:
         monkeypatch.delenv("WORDPRESS_URL", raising=False)
         monkeypatch.delenv("WORDPRESS_USER", raising=False)
         monkeypatch.delenv("WORDPRESS_APP_PASSWORD", raising=False)
+        monkeypatch.setattr("src.publishers.wordpress.load_dotenv", lambda: None)
         pattern = "WORDPRESS_URL.*WORDPRESS_USER.*WORDPRESS_APP_PASSWORD"
         with pytest.raises(ValueError, match=pattern):
             WordPressPublisher()

@@ -5,6 +5,7 @@ import os
 from datetime import UTC, datetime
 
 import httpx
+from dotenv import load_dotenv
 
 from src.errors import CollectionError
 from src.models.blog_post import CollectedData
@@ -18,6 +19,7 @@ class GitHubCollector:
     API_BASE = "https://api.github.com"
 
     def __init__(self, token: str | None = None) -> None:
+        load_dotenv()
         self._token = token or os.environ.get("GITHUB_TOKEN", "")
         if not self._token:
             logger.warning(
