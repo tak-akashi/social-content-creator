@@ -33,7 +33,7 @@ uv run mypy src/
 - `src/`: ソースコード
   - `src/models/`: データモデル（BlogPost, CollectedData, PublishResult, XPublishResult, ContentTemplate）
   - `src/generators/`: 記事生成エンジン（BlogPostGenerator）
-  - `src/collectors/`: 情報収集ツール群（URL, GitHub, Gemini, WebSearch, Notion）
+  - `src/collectors/`: 情報収集ツール群（URL, GitHub, Gemini, WebSearch, NotionNews, NotionPaper）
   - `src/publishers/`: 投稿連携（WordPressPublisher, XPublisher）
   - `src/templates/`: コンテンツタイプ別テンプレート（8種類）
   - `src/utils/`: ユーティリティ（Markdown処理）
@@ -48,6 +48,8 @@ uv run mypy src/
   - `docs/ideas/`: アイデア・ブレインストーミング
   - `docs/briefs/`: ブレスト結果の方針メモ（記事生成前のブリーフ）
 - `.claude/skills/create-blog-post/`: ブログ記事生成スキル
+- `.claude/skills/publish-to-x/`: X（Twitter）投稿スキル
+- `.claude/skills/publish-to-wordpress/`: WordPress投稿スキル
 - `.claude/skills/wordpress-setup/`: WordPressセットアップスキル（Playwright MCP使用）
 - `.steering/`: 作業計画・タスク管理ファイル
 

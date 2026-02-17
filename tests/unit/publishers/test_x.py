@@ -271,6 +271,62 @@ class TestPublishThread:
         assert result.thread_ids == ["id1", "id2"]
 
 
+class TestPostTweetErrorHandling:
+    """_post_tweetのエラーハンドリングテスト。"""
+
+    @respx.mock
+    async def test_general_4xx_error_with_detail(self, publisher: XPublisher) -> None:
+        """一般4xxエラー時にレスポンスのdetailが含まれる。"""
+        respx.post(f"{X_API_BASE}/tweets").mock(
+            return_value=httpx.Response(
+                400, json={"detail": "Bad Request: invalid text"}
+            )
+        )
+
+        with pytest.raises(XPublishError, match="Bad Request: invalid text"):
+            await publisher._post_tweet("テスト")
+
+    @respx.mock
+    async def test_general_4xx_error_without_detail(self, publisher: XPublisher) -> None:
+        """一般4xxエラーでdetailがない場合のフォールバックメッセージ。"""
+        respx.post(f"{X_API_BASE}/tweets").mock(
+            return_value=httpx.Response(400, json={"error": "unknown"})
+        )
+
+        with pytest.raises(XPublishError, match="投稿に失敗しました"):
+            await publisher._post_tweet("テスト")
+
+    @respx.mock
+    async def test_general_4xx_error_invalid_json(self, publisher: XPublisher) -> None:
+        """一般4xxエラーでJSON解析に失敗した場合のフォールバック。"""
+        respx.post(f"{X_API_BASE}/tweets").mock(
+            return_value=httpx.Response(400, text="not json")
+        )
+
+        with pytest.raises(XPublishError, match="投稿に失敗しました"):
+            await publisher._post_tweet("テスト")
+
+    @respx.mock
+    async def test_success_response_invalid_json(self, publisher: XPublisher) -> None:
+        """成功レスポンスでJSON解析に失敗した場合。"""
+        respx.post(f"{X_API_BASE}/tweets").mock(
+            return_value=httpx.Response(201, text="not json")
+        )
+
+        with pytest.raises(XPublishError, match="レスポンスの解析に失敗"):
+            await publisher._post_tweet("テスト")
+
+    @respx.mock
+    async def test_rate_limit_error(self, publisher: XPublisher) -> None:
+        """レート制限エラー(429)時にXPublishErrorが発生する。"""
+        respx.post(f"{X_API_BASE}/tweets").mock(
+            return_value=httpx.Response(429, json={"detail": "Too Many Requests"})
+        )
+
+        with pytest.raises(XPublishError, match="レート制限"):
+            await publisher._post_tweet("テスト")
+
+
 class TestPostTweetRetry:
     """_post_tweetのリトライ動作テスト。"""
 

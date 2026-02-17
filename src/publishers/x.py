@@ -2,7 +2,6 @@
 
 import asyncio
 import os
-
 import typing
 
 import httpx
@@ -17,10 +16,8 @@ X_API_BASE = "https://api.x.com/2"
 MAX_TWEET_LENGTH = 280
 THREAD_WAIT_SECONDS = 0.1
 
-_REQUIRED_ENV_VARS = ("X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_TOKEN_SECRET")
 
-
-class _OAuth1AuthJsonFix(OAuth1Auth):
+class _OAuth1AuthJsonFix(OAuth1Auth):  # type: ignore[misc]
     """authlib の OAuth1Auth は JSON body を署名時に空にしてしまうバグがある。
 
     OAuth 1.0a の仕様では JSON body は署名に含めないのが正しいが、
@@ -117,14 +114,23 @@ class XPublisher:
 
                 if response.status_code in (401, 403):
                     raise XPublishError(
-                        message="認証に失敗しました。.envのX_API_KEY, X_API_SECRET, X_ACCESS_TOKEN, X_ACCESS_TOKEN_SECRETを確認してください。",
+                        message=(
+                            "認証に失敗しました。.envの"
+                            "X_API_KEY, X_API_SECRET, "
+                            "X_ACCESS_TOKEN, X_ACCESS_TOKEN_SECRET"
+                            "を確認してください。"
+                        ),
                         status_code=response.status_code,
                     )
 
                 if response.status_code == 402:
                     raise XPublishError(
-                        message="APIクレジットが不足しています。X Developer Portalでクレジットを購入してください。"
-                        " https://developer.x.com/",
+                        message=(
+                            "APIクレジットが不足しています。"
+                            "X Developer Portalでクレジットを"
+                            "購入してください。"
+                            " https://developer.x.com/"
+                        ),
                         status_code=402,
                     )
 
@@ -222,31 +228,24 @@ class XPublisher:
         thread_ids: list[str] = []
         reply_to: str | None = None
 
-        try:
-            for i, text in enumerate(texts):
-                data = await self._post_tweet(text, reply_to=reply_to)
-                tweet_data = data.get("data", {})
-                if isinstance(tweet_data, dict):
-                    tweet_id = str(tweet_data.get("id", ""))
-                else:
-                    tweet_id = ""
-                thread_ids.append(tweet_id)
-                reply_to = tweet_id
+        for i, text in enumerate(texts):
+            data = await self._post_tweet(text, reply_to=reply_to)
+            tweet_data = data.get("data", {})
+            if isinstance(tweet_data, dict):
+                tweet_id = str(tweet_data.get("id", ""))
+            else:
+                tweet_id = ""
+            thread_ids.append(tweet_id)
+            reply_to = tweet_id
 
-                if i < len(texts) - 1:
-                    await asyncio.sleep(THREAD_WAIT_SECONDS)
+            if i < len(texts) - 1:
+                await asyncio.sleep(THREAD_WAIT_SECONDS)
 
-            first_id = thread_ids[0] if thread_ids else None
-            tweet_url = f"https://x.com/i/status/{first_id}" if first_id else None
-            return XPublishResult(
-                success=True,
-                tweet_id=first_id,
-                tweet_url=tweet_url,
-                thread_ids=thread_ids,
-            )
-        except XPublishError as e:
-            return XPublishResult(
-                success=False,
-                error_message=str(e),
-                thread_ids=thread_ids,
-            )
+        first_id = thread_ids[0] if thread_ids else None
+        tweet_url = f"https://x.com/i/status/{first_id}" if first_id else None
+        return XPublishResult(
+            success=True,
+            tweet_id=first_id,
+            tweet_url=tweet_url,
+            thread_ids=thread_ids,
+        )
