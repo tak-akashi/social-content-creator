@@ -142,6 +142,58 @@ class TestWordPressPublisher:
         result = await publisher.publish(blog_post, categories=["AI"], tags=["python"])
         assert result.success is True
 
+    async def test_publish_with_subtitle_includes_meta(
+        self, publisher: WordPressPublisher, respx_mock: object
+    ) -> None:
+        """subtitle付き投稿でpayloadにmeta.subtitleが含まれる。"""
+        import respx as respx_lib
+
+        post = BlogPost(
+            title="サブタイトル付き投稿",
+            subtitle="補足サブタイトル",
+            content="<p>コンテンツ</p>",
+            content_type="weekly-ai-news",
+            slug="subtitle-test",
+            created_at=datetime(2026, 2, 13, tzinfo=UTC),
+        )
+
+        route = respx_lib.post("https://example.com/wp-json/wp/v2/posts").mock(
+            return_value=httpx.Response(
+                201,
+                json={"id": 50, "link": "https://example.com/blog/subtitle-test"},
+            )
+        )
+
+        result = await publisher.publish(post, status="draft")
+        assert result.success is True
+
+        request_json = route.calls[0].request.content
+        import json
+
+        payload = json.loads(request_json)
+        assert payload["meta"] == {"subtitle": "補足サブタイトル"}
+
+    async def test_publish_without_subtitle_excludes_meta(
+        self, publisher: WordPressPublisher, blog_post: BlogPost, respx_mock: object
+    ) -> None:
+        """subtitleなし投稿でpayloadにmetaが含まれない。"""
+        import respx as respx_lib
+
+        route = respx_lib.post("https://example.com/wp-json/wp/v2/posts").mock(
+            return_value=httpx.Response(
+                201,
+                json={"id": 51, "link": "https://example.com/blog/test-post"},
+            )
+        )
+
+        result = await publisher.publish(blog_post, status="draft")
+        assert result.success is True
+
+        import json
+
+        payload = json.loads(route.calls[0].request.content)
+        assert "meta" not in payload
+
     async def test_publish_auth_error(
         self, publisher: WordPressPublisher, blog_post: BlogPost, respx_mock: object
     ) -> None:

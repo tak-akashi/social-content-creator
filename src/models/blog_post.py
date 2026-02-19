@@ -23,6 +23,7 @@ class BlogPost(BaseModel):
     """ブログ記事のデータモデル。"""
 
     title: str
+    subtitle: str | None = None
     content: str
     content_type: ContentType
     status: PostStatus = "draft"

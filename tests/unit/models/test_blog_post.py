@@ -80,6 +80,30 @@ class TestBlogPost:
             assert post.content_type == ct
 
 
+    def test_create_with_subtitle(self) -> None:
+        """subtitle付きで生成できる。"""
+        post = BlogPost(
+            title="メインタイトル",
+            subtitle="サブタイトル補足情報",
+            content="コンテンツ",
+            content_type="weekly-ai-news",
+            slug="test",
+            created_at=datetime.now(UTC),
+        )
+        assert post.subtitle == "サブタイトル補足情報"
+
+    def test_create_without_subtitle(self) -> None:
+        """subtitleなしで生成できる（後方互換）。"""
+        post = BlogPost(
+            title="メインタイトル",
+            content="コンテンツ",
+            content_type="weekly-ai-news",
+            slug="test",
+            created_at=datetime.now(UTC),
+        )
+        assert post.subtitle is None
+
+
 class TestCollectedData:
     """CollectedDataモデルのテスト。"""
 

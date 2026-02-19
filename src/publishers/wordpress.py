@@ -84,6 +84,8 @@ class WordPressPublisher:
                     "status": status,
                     "slug": post.slug,
                 }
+                if post.subtitle:
+                    payload["meta"] = {"subtitle": post.subtitle}
                 if category_ids:
                     payload["categories"] = category_ids
                 if tag_ids:
