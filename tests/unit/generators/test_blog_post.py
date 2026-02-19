@@ -69,6 +69,17 @@ class TestBlogPostGenerator:
             assert post.status == "draft"
             assert post.slug
 
+        async def test_generates_blog_post_with_subtitle(self, tmp_project_dir: Path) -> None:
+            """subtitle付きBlogPostオブジェクトが生成される。"""
+            gen = BlogPostGenerator(base_dir=tmp_project_dir)
+            post = await gen.generate(
+                content_type="weekly-ai-news",
+                title="テスト記事",
+                content="# テスト\nコンテンツ",
+                subtitle="サブタイトル補足",
+            )
+            assert post.subtitle == "サブタイトル補足"
+
     class TestSaveDraft:
         """save_draftのテスト。"""
 
@@ -90,6 +101,35 @@ class TestBlogPostGenerator:
             assert "type: weekly-ai-news" in content
             assert "# テスト" in content
 
+        async def test_saves_subtitle_in_frontmatter(self, tmp_project_dir: Path) -> None:
+            """subtitle付きBlogPostを保存するとfrontmatterにsubtitleが含まれる。"""
+            gen = BlogPostGenerator(base_dir=tmp_project_dir)
+            post = BlogPost(
+                title="サブタイトル保存テスト",
+                subtitle="補足情報",
+                content="# テスト\nコンテンツ",
+                content_type="weekly-ai-news",
+                slug="subtitle-save-test",
+                created_at=datetime(2026, 2, 13, 12, 0, 0, tzinfo=UTC),
+            )
+            path = await gen.save_draft(post)
+            content = path.read_text()
+            assert "subtitle: 補足情報" in content
+
+        async def test_saves_without_subtitle_key(self, tmp_project_dir: Path) -> None:
+            """subtitleなしBlogPostを保存するとfrontmatterにsubtitleキーが含まれない。"""
+            gen = BlogPostGenerator(base_dir=tmp_project_dir)
+            post = BlogPost(
+                title="保存テスト",
+                content="# テスト\nコンテンツ",
+                content_type="weekly-ai-news",
+                slug="save-no-sub-test",
+                created_at=datetime(2026, 2, 13, 12, 0, 0, tzinfo=UTC),
+            )
+            path = await gen.save_draft(post)
+            content = path.read_text()
+            assert "subtitle:" not in content
+
     class TestLoadDraft:
         """load_draftのテスト。"""
 
@@ -109,6 +149,35 @@ class TestBlogPostGenerator:
             assert loaded.title == "読み込みテスト"
             assert loaded.content_type == "weekly-ai-news"
             assert "テスト" in loaded.content
+
+        async def test_loads_draft_with_subtitle(self, tmp_project_dir: Path) -> None:
+            """subtitle付きドラフトを読み込むとsubtitleが復元される。"""
+            gen = BlogPostGenerator(base_dir=tmp_project_dir)
+            post = BlogPost(
+                title="サブタイトル復元テスト",
+                subtitle="復元される補足情報",
+                content="# テスト\nコンテンツ",
+                content_type="weekly-ai-news",
+                slug="subtitle-load-test",
+                created_at=datetime(2026, 2, 13, 12, 0, 0, tzinfo=UTC),
+            )
+            path = await gen.save_draft(post)
+            loaded = await gen.load_draft(path)
+            assert loaded.subtitle == "復元される補足情報"
+
+        async def test_loads_draft_without_subtitle(self, tmp_project_dir: Path) -> None:
+            """subtitleなしドラフトを読み込むとsubtitleがNoneになる。"""
+            gen = BlogPostGenerator(base_dir=tmp_project_dir)
+            post = BlogPost(
+                title="サブタイトルなし復元テスト",
+                content="# テスト\nコンテンツ",
+                content_type="weekly-ai-news",
+                slug="no-subtitle-load-test",
+                created_at=datetime(2026, 2, 13, 12, 0, 0, tzinfo=UTC),
+            )
+            path = await gen.save_draft(post)
+            loaded = await gen.load_draft(path)
+            assert loaded.subtitle is None
 
     class TestMoveToPublished:
         """move_to_publishedのテスト。"""

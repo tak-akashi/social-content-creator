@@ -88,6 +88,7 @@ class BlogPostGenerator:
         content_type: ContentType,
         title: str,
         content: str,
+        subtitle: str | None = None,
         topic: str | None = None,
         source_url: str | None = None,
         collected_data: list[CollectedData] | None = None,
@@ -100,6 +101,7 @@ class BlogPostGenerator:
             content_type: コンテンツタイプ
             title: 記事タイトル
             content: 記事本文（Markdown）
+            subtitle: サブタイトル
             topic: トピック
             source_url: 参照URL
             collected_data: 収集データ
@@ -110,6 +112,7 @@ class BlogPostGenerator:
         slug = generate_slug(title)
         return BlogPost(
             title=title,
+            subtitle=subtitle,
             content=content,
             content_type=content_type,
             status="draft",
@@ -140,6 +143,8 @@ class BlogPostGenerator:
             "status": post.status,
             "slug": post.slug,
         }
+        if post.subtitle:
+            metadata["subtitle"] = post.subtitle
         if post.categories:
             metadata["categories"] = post.categories
         if post.tags:
@@ -162,8 +167,11 @@ class BlogPostGenerator:
             読み込んだBlogPost
         """
         metadata, content = read_frontmatter_markdown(path)
+        raw_subtitle = metadata.get("subtitle")
+        subtitle = str(raw_subtitle) if raw_subtitle is not None else None
         return BlogPost(
             title=str(metadata.get("title", "")),
+            subtitle=subtitle,
             content=content,
             content_type=metadata.get("type", "weekly-ai-news"),  # type: ignore[arg-type]
             status=metadata.get("status", "draft"),  # type: ignore[arg-type]

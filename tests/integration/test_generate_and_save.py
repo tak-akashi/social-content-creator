@@ -42,6 +42,31 @@ class TestGenerateAndSave:
         assert not draft_path.exists()
         assert "posts" in str(post_path)
 
+    async def test_full_lifecycle_with_subtitle(self, tmp_project_dir: Path) -> None:
+        """subtitle付き記事の生成→保存→読み込みが一貫して動作する。"""
+        gen = BlogPostGenerator(base_dir=tmp_project_dir)
+
+        # 記事生成
+        post = await gen.generate(
+            content_type="tool-tips",
+            title="pytest tips",
+            content="# pytest Tips\n\npytestの便利な使い方。",
+            subtitle="初心者向けテスト入門ガイド",
+            topic="pytest tips",
+        )
+        assert post.subtitle == "初心者向けテスト入門ガイド"
+
+        # ドラフト保存
+        draft_path = await gen.save_draft(post)
+        assert draft_path.exists()
+        content = draft_path.read_text()
+        assert "subtitle:" in content
+
+        # 読み込み
+        loaded = await gen.load_draft(draft_path)
+        assert loaded.subtitle == "初心者向けテスト入門ガイド"
+        assert loaded.title == "pytest tips"
+
     async def test_generate_with_japanese_title(self, tmp_project_dir: Path) -> None:
         """日本語タイトルの記事が正しく保存される。"""
         gen = BlogPostGenerator(base_dir=tmp_project_dir)

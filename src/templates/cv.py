@@ -34,5 +34,6 @@ def create_template() -> ContentTemplate:
             ),
         ],
         style_guide="です・ます調。図や画像を多用し、視覚的に理解しやすい記事を心がける。"
-        "コード例はPyTorch/OpenCV等の主要フレームワークを使用する。",
+        "コード例はPyTorch/OpenCV等の主要フレームワークを使用する。"
+        "メインタイトルは30文字以内目安。補足情報はサブタイトルとして分離する。",
     )
